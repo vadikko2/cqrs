@@ -1109,6 +1109,15 @@ Contributions are welcome. To develop locally:
 
 The project uses [ruff](https://docs.astral.sh/ruff/) for linting and [pyright](https://microsoft.github.io/pyright/) for type checking.
 
+### Good first issues
+
+A couple of scoped starting points:
+
+- [#79](https://github.com/pypatterns/python-cqrs/issues/79) — add a "When NOT to use python-cqrs" page (docs) — shows where CQRS/Outbox/Saga are overkill.
+- [#80](https://github.com/pypatterns/python-cqrs/issues/80) — minimal FastAPI + Outbox end-to-end sample (example) — wires the docs into a runnable app.
+
+The [`good first issue`](https://github.com/pypatterns/python-cqrs/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) label lists anything else that is scoped for a first contribution.
+
 ## Changelog
 
 Release notes and migration guides are published on [GitHub Releases](https://github.com/vadikko2/python-cqrs/releases).
