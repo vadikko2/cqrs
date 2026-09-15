@@ -43,6 +43,7 @@
 ## Table of Contents
 
 - [Overview](#overview)
+- [When NOT to use python-cqrs](#when-not-to-use-python-cqrs)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Request and Response Types](#request-and-response-types)
@@ -88,6 +89,16 @@ project ([documentation](https://akhundmurad.github.io/diator/)) with several en
 - **Integration:** Ready for integration with FastAPI and FastStream.
 - **Documentation:** Built-in Mermaid diagram generation (Sequence and Class diagrams).
 - **Protobuf:** Interface-level support for converting Notification events to Protobuf and back.
+
+## When NOT to use python-cqrs
+
+CQRS, Outbox, and Saga are tools for specific problems — not a default for every service.
+
+- **Prefer a local DB transaction** for single-service CRUD (one database, no broker, no compensation).
+- **Use [Transactional Outbox](#transactional-outbox)** when you dual-write to a database **and** a message broker. Commit the business row and the outbox row together; a publisher drains the outbox later.
+- **Use [Saga](#saga-pattern)** when a multi-step flow crosses service/database boundaries and a later step must be compensated if it fails.
+
+Do not add a Saga for a single `UPDATE` in one service, and do not use a Saga as a substitute for Outbox. Full write-up: [When NOT to use python-cqrs](https://mkdocs.python-cqrs.dev/when_not_to_use/).
 
 ## Installation
 
