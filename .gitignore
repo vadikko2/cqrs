@@ -164,6 +164,7 @@ cython_debug/
 report.xml
 tmp/
 .DS_Store
+*.db
 
 # UV lock
 uv.lock

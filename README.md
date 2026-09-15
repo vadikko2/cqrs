@@ -43,6 +43,7 @@
 ## Table of Contents
 
 - [Overview](#overview)
+- [When NOT to use python-cqrs](#when-not-to-use-python-cqrs)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Request and Response Types](#request-and-response-types)
@@ -88,6 +89,16 @@ project ([documentation](https://akhundmurad.github.io/diator/)) with several en
 - **Integration:** Ready for integration with FastAPI and FastStream.
 - **Documentation:** Built-in Mermaid diagram generation (Sequence and Class diagrams).
 - **Protobuf:** Interface-level support for converting Notification events to Protobuf and back.
+
+## When NOT to use python-cqrs
+
+CQRS, Outbox, and Saga are tools for specific problems — not a default for every service.
+
+- **Prefer a local DB transaction** for single-service CRUD (one database, no broker, no compensation).
+- **Use [Transactional Outbox](#transactional-outbox)** when you dual-write to a database **and** a message broker. Commit the business row and the outbox row together; a publisher drains the outbox later.
+- **Use [Saga](#saga-pattern)** when a multi-step flow crosses service/database boundaries and a later step must be compensated if it fails.
+
+Do not add a Saga for a single `UPDATE` in one service, and do not use a Saga as a substitute for Outbox. Full write-up: [When NOT to use python-cqrs](docs/when_not_to_use.md).
 
 ## Installation
 
@@ -795,6 +806,9 @@ class JoinMeetingCommandHandler(cqrs.RequestHandler[JoinMeetingCommand, None]):
 A complete example can be found in
 the [documentation](https://github.com/vadikko2/python-cqrs/blob/master/examples/save_events_into_outbox.py)
 
+A runnable FastAPI flow (route → command → transactional outbox → publisher stub) is in
+[fastapi_outbox.py](https://github.com/vadikko2/python-cqrs/blob/master/examples/fastapi_outbox.py)
+
 > [!TIP]
 > You can specify the name of the Outbox table using the environment variable `OUTBOX_SQLA_TABLE`.
 > By default, it is set to `outbox`.
@@ -953,6 +967,9 @@ async def join_metting(
 
 A complete example can be found in
 the [documentation](https://github.com/vadikko2/python-cqrs/blob/master/examples/fastapi_integration.py)
+
+End-to-end command + outbox sample (business row and outbox event in one transaction, plus a publisher stub):
+[fastapi_outbox.py](https://github.com/vadikko2/python-cqrs/blob/master/examples/fastapi_outbox.py)
 
 ### Kafka events consuming
 
