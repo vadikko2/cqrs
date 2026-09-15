@@ -98,7 +98,7 @@ CQRS, Outbox, and Saga are tools for specific problems — not a default for eve
 - **Use [Transactional Outbox](#transactional-outbox)** when you dual-write to a database **and** a message broker. Commit the business row and the outbox row together; a publisher drains the outbox later.
 - **Use [Saga](#saga-pattern)** when a multi-step flow crosses service/database boundaries and a later step must be compensated if it fails.
 
-Do not add a Saga for a single `UPDATE` in one service, and do not use a Saga as a substitute for Outbox. Full write-up: [When NOT to use python-cqrs](https://mkdocs.python-cqrs.dev/when_not_to_use/).
+Do not add a Saga for a single `UPDATE` in one service, and do not use a Saga as a substitute for Outbox. Full write-up: [When NOT to use python-cqrs](docs/when_not_to_use.md).
 
 ## Installation
 
