@@ -8,7 +8,7 @@ Thank you for your interest in contributing to `python-cqrs`! We welcome contrib
 
 - **Python Version:** Python **3.10** or higher (3.10, 3.11, 3.12, 3.13 are supported).
 - **Git** installed on your system.
-- *(Optional, for integration tests)*: **Docker** & **Docker Compose** for running database and broker services (MySQL, PostgreSQL, Redis, Kafka, RabbitMQ).
+- *(Optional, for integration tests)*: **Docker** & **Docker Compose**. `docker-compose-test.yml` provides MySQL, PostgreSQL, and Redis. Kafka is available separately in `docker-compose-dev.yml` for local broker experiments; RabbitMQ is not defined in either Compose file.
 
 ---
 
@@ -32,9 +32,14 @@ Thank you for your interest in contributing to `python-cqrs`! We welcome contrib
    ```
 
 3. **Install Dependencies in Editable Mode:**
-   Install `python-cqrs` along with developer tooling and examples:
+   Minimal developer install (tooling and tests):
    ```bash
    pip install --upgrade pip
+   pip install -e ".[dev]"
+   ```
+
+   Optionally also install example extras (FastAPI, FastStream, uvicorn, and related packages):
+   ```bash
    pip install -e ".[dev,examples]"
    ```
 
@@ -86,19 +91,19 @@ vermin --target=3.10- --violations --eval-annotations --backport typing_extensio
 Tests are organized under the `tests/` directory and executed with `pytest`.
 
 ### Unit Tests
-Run unit tests locally:
+Run the unit suite locally (no Docker required):
 ```bash
-pytest tests/
+pytest -c ./tests/pytest-config.ini ./tests/unit
 ```
 
 ### Integration Tests with Docker
-For tests requiring backing services (such as MySQL, Postgres, Redis, RabbitMQ, Kafka):
+Integration tests need the services defined in `docker-compose-test.yml` (MySQL, PostgreSQL, Redis):
 ```bash
 # Start test infrastructure
 docker compose -f docker-compose-test.yml up -d
 
-# Run tests
-pytest tests/
+# Run integration tests
+pytest -c ./tests/pytest-config.ini ./tests/integration
 
 # Stop infrastructure when finished
 docker compose -f docker-compose-test.yml down
@@ -119,7 +124,7 @@ Before opening a PR, ensure:
 - [ ] Code follows formatting standards (`ruff format`).
 - [ ] Linter checks pass without errors (`ruff check`).
 - [ ] Type checks pass (`pyright`).
-- [ ] Tests pass locally (`pytest`).
+- [ ] Unit tests pass locally (`pytest -c ./tests/pytest-config.ini ./tests/unit`).
 - [ ] Commits have clear and descriptive messages.
 
 ---
