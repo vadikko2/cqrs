@@ -54,6 +54,14 @@ from cqrs.saga.step import (
     SagaStepHandler,
     SagaStepResult,
 )
+from cqrs.sqlalchemy_types import (
+    Binary16,
+    DialectAwareType,
+    DialectTypeHandler,
+    JSONType,
+    PayloadBinary,
+    UUIDBinary,
+)
 
 __all__ = (
     "ICircuitBreaker",
@@ -108,4 +116,10 @@ __all__ = (
     "ContextT",
     "SagaMermaid",
     "CoRMermaid",
+    "DialectAwareType",
+    "DialectTypeHandler",
+    "UUIDBinary",
+    "Binary16",
+    "JSONType",
+    "PayloadBinary",
 )

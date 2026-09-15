@@ -86,6 +86,7 @@ project ([documentation](https://akhundmurad.github.io/diator/)) with several en
 
 - **Typing:** Pydantic [v2.*](https://docs.pydantic.dev/2.8/) and `IRequest`/`IResponse` interfaces — use Pydantic-based, dataclass-based, or custom Request/Response implementations.
 - **Broker:** Kafka via [aiokafka](https://github.com/aio-libs/aiokafka).
+- **Storage:** SQLAlchemy-based Outbox and Saga storage on MySQL/MariaDB and PostgreSQL.
 - **Integration:** Ready for integration with FastAPI and FastStream.
 - **Documentation:** Built-in Mermaid diagram generation (Sequence and Class diagrams).
 - **Protobuf:** Interface-level support for converting Notification events to Protobuf and back.
@@ -810,9 +811,15 @@ A runnable FastAPI flow (route → command → transactional outbox → publishe
 [fastapi_outbox.py](https://github.com/vadikko2/python-cqrs/blob/master/examples/fastapi_outbox.py)
 
 > [!TIP]
-> You can specify the name of the Outbox table using the environment variable `OUTBOX_SQLA_TABLE`.
-> By default, it is set to `outbox`.
-
+> The Outbox table is named `outbox` by default. To rename it, or to attach the model to your own declarative
+> base, use `cqrs.rebind_outbox_model(OutboxModel, Base, table_name="my_outbox_table")` at startup — before
+> `create_all()`, before generating migrations and before the first query.
+> [!TIP]
+> `SqlAlchemyOutboxedEventRepository` works on **MySQL/MariaDB** and **PostgreSQL**: the outbox columns are
+> rendered with dialect-aware types (`BINARY(16)` on MySQL, `UUID`/`BYTEA` on PostgreSQL), with a portable
+> `BLOB` fallback for other dialects. Switching databases is a DSN change only — see the
+> [Database Support](https://mkdocs.python-cqrs.dev/outbox/databases/) docs for the DDL, the Alembic recipe and
+> how to register a native type for your own database.
 > [!TIP]
 > If you use the protobuf events you should specify `OutboxedEventRepository`
 > by [protobuf serialize](https://github.com/vadikko2/python-cqrs/blob/master/src/cqrs/serializers/protobuf.py). A complete example can be found in

@@ -44,6 +44,45 @@ async def session(init_orm):
         yield session
 
 
+# --- Outbox: PostgreSQL (DATABASE_DSN указывает на MySQL, поэтому нужен отдельный сплит) ---
+
+
+@pytest.fixture(scope="function")
+async def init_orm_postgres():
+    """Поднять схему outbox на живом PostgreSQL (DATABASE_DSN_POSTGRESQL)."""
+    if not DATABASE_DSN_POSTGRESQL:
+        pytest.skip("DATABASE_DSN_POSTGRESQL not set")
+    engine = create_async_engine(
+        DATABASE_DSN_POSTGRESQL,
+        pool_pre_ping=True,
+        pool_size=10,
+        max_overflow=30,
+        echo=False,
+    )
+    # DDL в PostgreSQL транзакционный, поэтому схему коммитим до yield:
+    # иначе открытая транзакция держит блокировку таблицы и тесты повиснут.
+    async with engine.begin() as connect:
+        await connect.run_sync(sqlalchemy.Base.metadata.drop_all)
+        await connect.run_sync(sqlalchemy.Base.metadata.create_all)
+    async with engine.connect() as connect:
+        yield connect
+    await engine.dispose()
+
+
+@pytest.fixture(scope="function")
+async def session_postgres(init_orm_postgres):
+    engine_factory = functools.partial(
+        create_async_engine,
+        DATABASE_DSN_POSTGRESQL,
+        isolation_level="REPEATABLE READ",
+    )
+    engine = engine_factory()
+    session = async_sessionmaker(engine)()
+    async with contextlib.aclosing(session):
+        yield session
+    await engine.dispose()
+
+
 # --- Saga storage: MySQL (отдельные фикстуры, поднимают схему и всё необходимое) ---
 
 

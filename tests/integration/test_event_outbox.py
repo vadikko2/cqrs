@@ -213,9 +213,23 @@ class TestOutbox:
 
 
 async def test_rebind_outbox_model_positive(init_orm, session):
+    original_base = sqlalchemy.OutboxModel.__bases__[0]
+    original_table_name = sqlalchemy.OutboxModel.__table__.name
     custom_base = registry().generate_base()
-    sqlalchemy.rebind_outbox_model(sqlalchemy.OutboxModel, custom_base, "rebind_outbox")
-    await init_orm.run_sync(custom_base.metadata.create_all)
+    try:
+        sqlalchemy.rebind_outbox_model(
+            sqlalchemy.OutboxModel,
+            custom_base,
+            "rebind_outbox",
+        )
+        await init_orm.run_sync(custom_base.metadata.create_all)
 
-    async with session.begin():
-        await session.execute(sqla.text("SELECT * FROM rebind_outbox WHERE True;"))
+        async with session.begin():
+            await session.execute(sqla.text("SELECT * FROM rebind_outbox WHERE True;"))
+    finally:
+        # Rebinding mutates the model globally, restore it for the other tests.
+        sqlalchemy.rebind_outbox_model(
+            sqlalchemy.OutboxModel,
+            original_base,
+            original_table_name,
+        )

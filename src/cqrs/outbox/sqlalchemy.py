@@ -15,7 +15,8 @@ try:
     from sqlalchemy import func
     from sqlalchemy.orm import Mapped, mapped_column, DeclarativeMeta, registry
     from sqlalchemy.ext.asyncio import session as sql_session
-    from sqlalchemy.dialects import postgresql
+
+    from cqrs import sqlalchemy_types
 except ImportError:
     raise ImportError(
         "You are trying to use SQLAlchemy outbox implementation, "
@@ -35,37 +36,10 @@ DEFAULT_OUTBOX_TABLE_NAME = "outbox"
 MAX_FLUSH_COUNTER_VALUE = 5
 
 
-class BinaryUUID(sqlalchemy.TypeDecorator):
-    """Stores the UUID as a native UUID in Postgres and as BINARY(16) in other databases (MySQL)."""
-
-    impl = sqlalchemy.BINARY(16)
-    cache_ok = True
-
-    def load_dialect_impl(self, dialect):
-        if dialect.name == "postgresql":
-            return dialect.type_descriptor(postgresql.UUID())
-        else:
-            return dialect.type_descriptor(sqlalchemy.BINARY(16))
-
-    def process_bind_param(self, value, dialect):
-        if value is None:
-            return value
-        if isinstance(value, str):
-            value = uuid.UUID(value)
-        if dialect.name == "postgresql":
-            return value  # asyncpg works with uuid.UUID
-        if isinstance(value, uuid.UUID):
-            return value.bytes  # For MySQL return 16 bytes
-        return value
-
-    def process_result_value(self, value, dialect):
-        if value is None:
-            return value
-        if dialect.name == "postgresql":
-            return value  # asyncpg return uuid.UUID
-        if isinstance(value, bytes):
-            return uuid.UUID(bytes=value)  # From MySQL got bytes, make UUID
-        return value
+# Deprecated name of cqrs.sqlalchemy_types.UUIDBinary — kept importable for
+# backward compatibility (e.g. already generated Alembic migrations).
+# Prefer cqrs.sqlalchemy_types.UUIDBinary in new code.
+BinaryUUID = sqlalchemy_types.UUIDBinary
 
 
 class OutboxModel(Base):
@@ -87,12 +61,12 @@ class OutboxModel(Base):
         comment="Identity",
     )
     event_id: Mapped[uuid.UUID] = mapped_column(
-        BinaryUUID,
+        sqlalchemy_types.UUIDBinary,
         nullable=False,
         comment="Event idempotency id",
     )
     event_id_bin: Mapped[bytes] = mapped_column(
-        sqlalchemy.BINARY(16),
+        sqlalchemy_types.Binary16,
         nullable=False,
         comment="Event idempotency id in 16 bit presentation",
     )
@@ -126,7 +100,7 @@ class OutboxModel(Base):
         comment="Event creation timestamp",
     )
     payload: Mapped[bytes] = mapped_column(
-        sqlalchemy.LargeBinary,
+        sqlalchemy_types.PayloadBinary,
         nullable=False,
         comment="Event payload",
     )
@@ -177,13 +151,14 @@ class OutboxModel(Base):
 
     @classmethod
     def status_sorting_case(cls) -> sqlalchemy.Case:
+        # Conditions instead of a `value=` mapping: only a comparison with the
+        # column binds the statuses through the Enum type. As plain mapping keys
+        # they are sent as enum values ("new"), which PostgreSQL rejects because
+        # its `eventstatus` type holds member names ("NEW").
         return sqlalchemy.case(
-            {
-                repository.EventStatus.NEW: 1,
-                repository.EventStatus.NOT_PRODUCED: 2,
-                repository.EventStatus.PRODUCED: 3,
-            },
-            value=cls.event_status,
+            (cls.event_status == repository.EventStatus.NEW, 1),
+            (cls.event_status == repository.EventStatus.NOT_PRODUCED, 2),
+            (cls.event_status == repository.EventStatus.PRODUCED, 3),
             else_=4,
         )
 
