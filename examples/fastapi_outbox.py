@@ -30,8 +30,8 @@ Open http://localhost:8000/docs and:
 
 Or with curl (server already running):
 
-   curl -s -X POST http://localhost:8000/orders \\
-     -H "Content-Type: application/json" \\
+   curl -s -X POST http://localhost:8000/orders \
+     -H "Content-Type: application/json" \
      -d '{"order_id": "ord-1", "amount": 19.99}'
    curl -s http://localhost:8000/orders
    curl -s http://localhost:8000/outbox
@@ -42,14 +42,14 @@ Optional: MySQL via docker compose
 ----------------------------------
    docker compose -f docker-compose-dev.yml up -d mysql_dev
    pip install -e ".[examples]" asyncmy
-   DATABASE_URL=mysql+asyncmy://cqrs:cqrs@localhost:3307/cqrs \\
+   DATABASE_URL=mysql+asyncmy://cqrs:cqrs@localhost:3307/cqrs \
      python examples/fastapi_outbox.py
 
 Optional: PostgreSQL via docker compose
 ---------------------------------------
    docker compose -f docker-compose-dev.yml up -d postgres_dev
    pip install -e ".[examples]" asyncpg
-   DATABASE_URL=postgresql+asyncpg://cqrs:cqrs@localhost:5433/cqrs \\
+   DATABASE_URL=postgresql+asyncpg://cqrs:cqrs@localhost:5433/cqrs \
      python examples/fastapi_outbox.py
 
 ================================================================================
