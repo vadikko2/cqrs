@@ -17,6 +17,8 @@ try:
     from sqlalchemy.exc import SQLAlchemyError
     from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
     from sqlalchemy.orm import registry
+
+    from cqrs.sqlalchemy_types import JSONType
 except ImportError:
     raise ImportError(
         "You are trying to use SQLAlchemy saga storage implementation, "
@@ -63,7 +65,7 @@ class SagaExecutionModel(Base):
         comment="Current status of the saga",
     )
     context = sqlalchemy.Column(
-        sqlalchemy.JSON,
+        JSONType,
         nullable=False,
         comment="Serialized context",
     )
