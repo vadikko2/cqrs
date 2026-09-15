@@ -806,6 +806,9 @@ class JoinMeetingCommandHandler(cqrs.RequestHandler[JoinMeetingCommand, None]):
 A complete example can be found in
 the [documentation](https://github.com/vadikko2/python-cqrs/blob/master/examples/save_events_into_outbox.py)
 
+A runnable FastAPI flow (route → command → transactional outbox → publisher stub) is in
+[fastapi_outbox.py](https://github.com/vadikko2/python-cqrs/blob/master/examples/fastapi_outbox.py)
+
 > [!TIP]
 > You can specify the name of the Outbox table using the environment variable `OUTBOX_SQLA_TABLE`.
 > By default, it is set to `outbox`.
@@ -964,6 +967,9 @@ async def join_metting(
 
 A complete example can be found in
 the [documentation](https://github.com/vadikko2/python-cqrs/blob/master/examples/fastapi_integration.py)
+
+End-to-end command + outbox sample (business row and outbox event in one transaction, plus a publisher stub):
+[fastapi_outbox.py](https://github.com/vadikko2/python-cqrs/blob/master/examples/fastapi_outbox.py)
 
 ### Kafka events consuming
 
