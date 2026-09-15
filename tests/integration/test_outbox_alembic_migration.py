@@ -108,11 +108,15 @@ async def run_migration(dsn: typing.Text) -> MigrationRunner:
     try:
         async with engine.begin() as connection:
             await connection.run_sync(runner)
-        async with engine.begin() as connection:
-            await connection.run_sync(drop_outbox_schema)
+        return runner
     finally:
-        await engine.dispose()
-    return runner
+        # Always drop leftover schema — MySQL may have committed partial DDL
+        # even when migration/inspection fails midway.
+        try:
+            async with engine.begin() as connection:
+                await connection.run_sync(drop_outbox_schema)
+        finally:
+            await engine.dispose()
 
 
 @pytest.fixture(scope="function")

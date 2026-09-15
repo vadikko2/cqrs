@@ -814,14 +814,12 @@ A runnable FastAPI flow (route → command → transactional outbox → publishe
 > The Outbox table is named `outbox` by default. To rename it, or to attach the model to your own declarative
 > base, use `cqrs.rebind_outbox_model(OutboxModel, Base, table_name="my_outbox_table")` at startup — before
 > `create_all()`, before generating migrations and before the first query.
-
 > [!TIP]
 > `SqlAlchemyOutboxedEventRepository` works on **MySQL/MariaDB** and **PostgreSQL**: the outbox columns are
 > rendered with dialect-aware types (`BINARY(16)` on MySQL, `UUID`/`BYTEA` on PostgreSQL), with a portable
 > `BLOB` fallback for other dialects. Switching databases is a DSN change only — see the
 > [Database Support](https://mkdocs.python-cqrs.dev/outbox/databases/) docs for the DDL, the Alembic recipe and
 > how to register a native type for your own database.
-
 > [!TIP]
 > If you use the protobuf events you should specify `OutboxedEventRepository`
 > by [protobuf serialize](https://github.com/vadikko2/python-cqrs/blob/master/src/cqrs/serializers/protobuf.py). A complete example can be found in
